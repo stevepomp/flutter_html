@@ -555,8 +555,31 @@ class HtmlRichTextParser extends StatelessWidget {
           case "bdi":
           case "data":
           case "time":
+            break;
           case "span":
             //No additional styles
+            Map<String, String> map = {};
+            List<String> split = node.attributes["style"] ?.split(";") ?? [];
+            split.forEach((item) {
+              List<String> val = item.split(":");
+              if(val.length == 2){
+                map[val[0].trim().toLowerCase()] = val[1].trim().toLowerCase();
+              }
+            });
+            String fontSize = map["font-size"] ?.replaceAll(RegExp(r'[^0-9]'), "");
+            String color = map["color"];
+            String backgroundColor = map["background-color"];
+            Color textColor;
+            Color textBackgroundColor;
+            if (color != null && color.contains("rgb(")) {
+              List<String> list = color.replaceAll(RegExp(r'[^0-9|,]'), "").split(",");
+              textColor = Color.fromRGBO(int.parse(list[0]), int.parse(list[1]), int.parse(list[2]), 1);
+            }
+            if (backgroundColor != null && backgroundColor.contains("rgb(")) {
+              List<String> list = backgroundColor.replaceAll(RegExp(r'[^0-9|,]'), "").split(",");
+              textBackgroundColor = Color.fromRGBO(int.parse(list[0]), int.parse(list[1]), int.parse(list[2]), 1);
+            }
+            childStyle = childStyle.merge(TextStyle(height: 2, fontSize: (fontSize != null && fontSize.isNotEmpty) ? double.parse(fontSize) : 18.0, color: textColor ?? childStyle.color, backgroundColor: textBackgroundColor ?? childStyle.backgroundColor));
             break;
         }
 
@@ -870,6 +893,37 @@ class HtmlRichTextParser extends StatelessWidget {
             nextContext.spansOnly = true;
             nextContext.inBlock = true;
             break;
+
+          case "p":
+            Map<String, String> map = {};
+            List<String> split = node.attributes["style"] ?.split(";") ?? [];
+            split.forEach((item) {
+              List<String> val = item.split(":");
+              if(val.length == 2){
+                map[val[0].trim().toLowerCase()] = val[1].trim().toLowerCase();
+              }
+            });
+            switch (map["text-align"]) {
+              case "center":
+                textAlign = TextAlign.center;
+                break;
+              case "left":
+                textAlign = TextAlign.left;
+                break;
+              case "right":
+                textAlign = TextAlign.right;
+                break;
+              case "start":
+                textAlign = TextAlign.start;
+                break;
+              case "end":
+                textAlign = TextAlign.end;
+                break;
+              case "justify":
+                textAlign = TextAlign.justify;
+                break;
+            }
+            continue myDefault;
 
           case "h1":
             nextContext.childStyle = nextContext.childStyle.merge(
