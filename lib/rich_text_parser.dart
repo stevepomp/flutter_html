@@ -743,7 +743,7 @@ class HtmlRichTextParser extends StatelessWidget {
         // block elements only show up at the "root" widget level
         // so if we have a block element, reset the parentElement to null
         parseContext.parentElement = null;
-        TextAlign textAlign = TextAlign.left;
+        TextAlign textAlign = TextAlign.justify;
         if (customTextAlign != null) {
           textAlign = customTextAlign(node) ?? textAlign;
         }
